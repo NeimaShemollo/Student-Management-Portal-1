@@ -365,3 +365,44 @@
     display: none;
   }
 }
+/* Container grid to handle side-by-side components responsive layout */
+.student-gridWrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+  max-width: 64rem;
+}
+
+/* Custom card container to match your layout metrics structure */
+.student-chartCard {
+  background: var(--bt-card);
+  border: 1px solid var(--bt-border);
+  border-radius: 20px;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 14px 36px rgba(26, 18, 22, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Internal frame dimensions to properly mount responsive vector shapes */
+.student-chartContainer {
+  width: 100%;
+  height: 240px;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+/* Custom Tooltip design mapping display systems */
+.student-chartTooltip {
+  background: #ffffff ;
+  border-radius: 12px ;
+  border: 1px solid var(--bt-border);
+}
+
+.student-chartTooltipLabel {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--bt-ink);
+}

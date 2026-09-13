@@ -20,7 +20,11 @@ import StudentDashboard, {
   StudentOverview,
   StudentSettings,
 } from "./pages/Student/StudentDashboard.jsx";
-
+import InstructorDashboard from "./pages/Instructor/InstructorDashboard.jsx";
+import InstructorCourses from "./pages/Instructor/InstructorCourses.jsx";
+import InstructorAssignments from "./pages/Instructor/InstructorAssignments.jsx";
+import InstructorGrades from "./pages/Instructor/InstructorGrades.jsx";
+import InstructorStudents from "./pages/Instructor/InstructorStudents.jsx";
 
 import { AuthContextProvider } from "./contexts/authContext.jsx";
 import Footer from "./components/common/Footer.jsx";
@@ -74,6 +78,15 @@ function AppContent() {
             <Route path="settings" element={<StudentSettings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
+
+
+  <Route path="/instructor" element={<InstructorDashboard />}>
+  <Route index element={<InstructorDashboard />} />
+  <Route path="courses" element={<InstructorCourses />} />
+  <Route path="assignments" element={<InstructorAssignments />} />
+  <Route path="grades" element={<InstructorGrades />} />
+  <Route path="students" element={<InstructorStudents />} />
+</Route>
         </Routes>
       </div>
       <Footer />
