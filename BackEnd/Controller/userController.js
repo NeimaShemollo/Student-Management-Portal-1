@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import User from "../Model/usersModel.js";
 import toSafeUser from "../utils/toSafeUser.js";
 import sendEmail, {transport} from "../utils/sendEmail.js";
-
+import Course from "../Model/courseModel.js"
 
 export const register = async (req, res) => {
     try {

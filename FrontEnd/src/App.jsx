@@ -8,6 +8,7 @@ import Register from "./pages/Auth/Register.jsx";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import WelcomePage from "./pages/Welcome/WelcomePage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminHome from "./pages/Admin/AdminHome.jsx";
 import StudentsList from "./pages/Admin/StudentsList";
 import InstructorsList from "./pages/Admin/InstructorsList.jsx";
 import RegisterStaff from "./pages/Admin/RegisterStaff.jsx";
@@ -21,10 +22,10 @@ import StudentDashboard, {
 } from "./pages/Student/StudentDashboard.jsx";
 
 
-import { UserContextProvider } from "./contexts/usercontext.jsx";
+import { AuthContextProvider } from "./contexts/authContext.jsx";
 import Footer from "./components/common/Footer.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
-
+import {InstructorProvider} from "./contexts/InstructorContext"
 
 function AppContent() {
   return (
@@ -39,22 +40,25 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<Register />} />
           
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="students" replace />} />
-            <Route path="register-staff" element={<RegisterStaff />} />
-            <Route path="students" element={<StudentsList />} />
-            <Route path="instructors" element={<InstructorsList />} />
-            <Route path="payments" element={<PaymentManagement />} />
-            <Route path="courses" element={<ManageCourses />} />
+<Route
+  path="/admin"
+  element={
+    <ProtectedRoute adminOnly>
+      <AdminDashboard />
+    </ProtectedRoute>
+  }
+>
+  
+  <Route index element={<AdminHome />} /> 
+  
+  <Route path="register-staff" element={<RegisterStaff />} />
+  <Route path="students" element={<StudentsList />} />
+  <Route path="instructors" element={<InstructorsList />} />
+  <Route path="payments" element={<PaymentManagement />} />
+  <Route path="courses" element={<ManageCourses />} />
+</Route>
 
-          </Route>
+          
           <Route
             path="/student-dashboard/:studentName"
             element={
@@ -80,9 +84,11 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <UserContextProvider>
+      <AuthContextProvider>
+        <InstructorProvider>
         <AppContent />
-      </UserContextProvider>
+        </InstructorProvider>
+      </AuthContextProvider>
     </BrowserRouter>
   );
 }

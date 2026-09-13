@@ -291,13 +291,15 @@ export const refreshAccessToken = async (req, res) => {
     
     const newAccessToken = generateAccessToken(decoded.id, decoded.role);
 
-    
+    const {role,id}=decoded
     return res.status(200).json({ 
       message: "Token refreshed successfully",
-      accessToken: newAccessToken 
+      accessToken: newAccessToken,
+      user:{role,id}
     });
     
   } catch (error) {
+    console.log(error)
     return res.status(401).json({ message: "Invalid or expired refresh token" });
   }
 };

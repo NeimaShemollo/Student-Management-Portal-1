@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Outlet, useLocation, useParams } from "react-router-dom";
-import { useUserContext } from "../../contexts/useUserContext.jsx";
+import { useAuthContext } from "../../contexts/useAuthContext.jsx";
 import { getStudentDashboardPath, toStudentSlug } from "./studentPath.js";
 import StudentPayments from "./StudentPayments.jsx";
 import "./StudentDashboard.css";
@@ -69,7 +69,7 @@ export function StudentSettings() {
 function StudentDashboard() {
   const { studentName } = useParams();
   const location = useLocation();
-  const { state } = useUserContext();
+  const { state } = useAuthContext();
   const user = state?.user;
   const expectedSlug = toStudentSlug(user?.fullName);
 

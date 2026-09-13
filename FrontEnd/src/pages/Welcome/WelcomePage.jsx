@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkAdmin, logout } from "../../service/authService.js";
-import { useUserContext } from "../../contexts/UseUserContext.jsx";
+import { useAuthContext } from "../../contexts/useAuthContext.jsx";
 import "./WelcomePage.css";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
-  const { setUser } = useUserContext();
+  const { setUser } = useAuthContext();
   const [error, setError] = useState("");
   const [loadingAdmin, setLoadingAdmin] = useState(false);
   const [loadingLogout, setLoadingLogout] = useState(false);

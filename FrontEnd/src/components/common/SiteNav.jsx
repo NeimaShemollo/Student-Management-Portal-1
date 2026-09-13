@@ -26,7 +26,7 @@ function SiteNav() {
         <Link to="/login" className="site-btnGhost">
           Log in
         </Link>
-           
+          
         <Link to="/register" className="site-btnPrimary">
           Sign up
         </Link>
