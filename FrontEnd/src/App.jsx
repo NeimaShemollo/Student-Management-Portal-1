@@ -20,11 +20,12 @@ import StudentDashboard, {
   StudentOverview,
   StudentSettings,
 } from "./pages/Student/StudentDashboard.jsx";
+import CourseClassroom from "./pages/Student/CourseClassroom.jsx"; 
+import PaymentPending from "./pages/Student/PaymentPending";
+import PaidStudentGuard from "./components/PaidStuentGuard.jsx"
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard.jsx";
-import InstructorCourses from "./pages/Instructor/InstructorCourses.jsx";
-import InstructorAssignments from "./pages/Instructor/InstructorAssignments.jsx";
-import InstructorGrades from "./pages/Instructor/InstructorGrades.jsx";
-import InstructorStudents from "./pages/Instructor/InstructorStudents.jsx";
+import { InstructorOverview } from "./pages/Instructor/InstructorOverview";
+
 
 import { AuthContextProvider } from "./contexts/authContext.jsx";
 import Footer from "./components/common/Footer.jsx";
@@ -63,30 +64,47 @@ function AppContent() {
 </Route>
 
           
-          <Route
-            path="/student-dashboard/:studentName"
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <StudentDashboard />
-              </ProtectedRoute>
-            }
-          >
-            
-            <Route index element={<StudentOverview />} />
-            <Route path="assignments" element={<StudentAssignments />} />
-            <Route path="courses" element={<StudentCoursesPanel />} />
-            <Route path="settings" element={<StudentSettings />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
 
+               
+  
+  <Route path="/payment-pending" element={<PaymentPending />} />
 
-  <Route path="/instructor" element={<InstructorDashboard />}>
-  <Route index element={<InstructorDashboard />} />
-  <Route path="courses" element={<InstructorCourses />} />
-  <Route path="assignments" element={<InstructorAssignments />} />
-  <Route path="grades" element={<InstructorGrades />} />
-  <Route path="students" element={<InstructorStudents />} />
+  
+  <Route
+    path="/student-dashboard/:studentName"
+    element={
+      <ProtectedRoute allowedRoles={["student"]}>
+        <PaidStudentGuard> {/* Forces validation intercept checks here */}
+          <StudentDashboard />
+        </PaidStudentGuard>
+      </ProtectedRoute>
+    }
+  >
+    <Route index element={<StudentOverview />} />
+    <Route path="assignments" element={<StudentAssignments />} />
+    <Route path="courses" element={<StudentCoursesPanel />} />
+    <Route path="settings" element={<StudentSettings />} />
+    <Route path="courses/:courseId" element={<CourseClassroom />} /> 
+  </Route>
+                 
+<Route
+  path="/instructor"
+  element={
+    <ProtectedRoute allowedRoles={["instructor"]}>
+      <InstructorDashboard />
+    </ProtectedRoute>
+  }
+>
+  
+  <Route index element={<InstructorOverview />} />
+  
+  <Route path="students" element={<div>Instructor Student List Page</div>} />
+  <Route path="courses" element={<div>Instructor Course Catalog View</div>} />
+  <Route path="assignments" element={<div>Instructor Assignment Manager</div>} />
+  <Route path="grades" element={<div>Instructor Grades Tracker</div>} />
+  <Route path="attendance" element={<div>Instructor Attendance Logs</div>} />
 </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
       <Footer />

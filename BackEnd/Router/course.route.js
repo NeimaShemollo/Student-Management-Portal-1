@@ -5,6 +5,7 @@ import {verifyAccessToken,
 } from "../Middlewares/authMiddleware.js";
 
 import {
+    getCourseDetail,
     createCourse,
     updateCourse,
     getAllCourses,
@@ -51,3 +52,7 @@ courseRoute.delete(
     isAdmin,
     deleteCourse
 );
+courseRoute.get(
+    "/detail/:courseId",
+     verifyAccessToken, 
+     getCourseDetail);

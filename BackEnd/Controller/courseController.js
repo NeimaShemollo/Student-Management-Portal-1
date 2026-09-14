@@ -39,9 +39,10 @@ export const createCourse = async (req, res) => {
         const newCourse = await Course.create({
             courseName,
             courseCode,
+            coursePrice,
             description,
             courseDuration,
-            instructorId: finalInstructorId, // Save as validated ID or null
+            instructorId: 
             batchNumber,
             programType
         });
@@ -133,6 +134,30 @@ export const deleteCourse = async (req, res) => {
                 "Course deleted successfully!"
         });
 
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
+// Add this to your course controller file
+export const getCourseDetail = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        // Find the course and populate the instructor details if needed
+        const course = await Course.findById(courseId).populate("instructorId", "fullName emailAddress");
+
+        if (!course) {
+            return res.status(404).json({
+                message: "Course program structure not found."
+            });
+        }
+
+        return res.status(200).json({
+            data: course
+        });
     } catch (error) {
         return res.status(500).json({
             message: error.message

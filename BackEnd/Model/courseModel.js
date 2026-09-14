@@ -15,6 +15,11 @@ const courseSchema = new mongoose.Schema(
             uppercase: true,
             trim: true
         },
+        coursePrice: {
+            type: Number,
+            required: true,
+            default: 0
+        },
 
         description: {
             type: String
@@ -38,14 +43,28 @@ const courseSchema = new mongoose.Schema(
         programType: {
             type: String,
             required: true
-        }
+        },
+
+        // 🌟 ADDED THIS FOR YOUR CLASSROOM LESSONS:
+        modules: [
+            {
+                title: { type: String, required: true }, // e.g., "Module 1: Introduction"
+                lessons: [
+                    {
+                        name: { type: String, required: true }, // e.g., "Getting Started"
+                        type: { type: String, enum: ["video", "reading", "quiz"], default: "video" },
+                        duration: { type: String }, // e.g., "15 mins"
+                        contentUrl: { type: String } // Streaming link or file path
+                    }
+                ]
+            }
+        ]
     },
     {
         timestamps: true
     }
 );
 
-const Course =
-    mongoose.model("Course", courseSchema);
+const Course = mongoose.model("Course", courseSchema);
 
 export default Course;

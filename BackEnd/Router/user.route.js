@@ -7,7 +7,7 @@ import {verifyAccessToken, isAdmin} from "../Middlewares/authMiddleware.js";
 
 import RegistrationSchema from "../Schema/RegistrationSchema.js";
 
-
+import { submitAssignment,getMyAssignments } from "../Controller/assignmentController.js";
 import { validate }from "../Middlewares/validate.js";
 
 
@@ -66,4 +66,12 @@ userRoute.patch(
     "/status/:id",
     verifyAccessToken,
     isAdmin,
-    updateUserStatus)
+    updateUserStatus);
+userRoute.post(
+        "/student/submit-assignment",
+        verifyAccessToken,
+        submitAssignment);
+    userRoute.get(
+        "/student/my-assignments",
+        verifyAccessToken,
+        getMyAssignments)

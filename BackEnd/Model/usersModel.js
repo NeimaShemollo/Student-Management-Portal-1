@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema(
             ],
             default: "student"
         },
+        isApproved: {
+            type: Boolean,
+            default: false 
+        },
 
         passwordResetToken: {
             type: String

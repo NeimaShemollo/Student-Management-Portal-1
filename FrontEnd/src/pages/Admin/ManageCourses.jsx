@@ -10,9 +10,10 @@ const columnHelper = legacyCreateColumnHelper();
 const emptyForm = {
   courseName: "",
   courseCode: "",
+  coursePrice: "", 
   description: "",
-  courseDuration: "", // Make sure this matches your database field ("credits" vs "courseDuration")
-  instructorId: "",   // Keep this initialized
+  courseDuration: "", 
+  instructorId: "",   
   batchNumber: "",
   programType: "Online",
 };
@@ -21,6 +22,7 @@ function ManageCourses() {
   const [courses, setCourses] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [formData, setFormData] = useState(emptyForm);
+  const [isEditing, setIsEditing] = useState(null); // TRACKER: stores course ID if editing, otherwise null
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -42,7 +44,6 @@ function ManageCourses() {
     const fetchInstructors = async () => {
       try {
         const res = await api.get("/users/instructors-list");
-        console.log("Instructors response:", res.data);
         const rows = res.data?.data ?? res.data ?? [];
         setInstructors(Array.isArray(rows) ? rows : []);
       } catch (err) {
@@ -56,28 +57,60 @@ function ManageCourses() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // 1. Populates the form fields with the selected course data
+  const handleEdit = (course) => {
+    setIsEditing(course._id);
+    setFormData({
+      courseName: course.courseName || "",
+      courseCode: course.courseCode || "",
+      coursePrice: course.coursePrice || "",
+      description: course.description || "",
+      courseDuration: course.courseDuration || "",
+      instructorId: course.instructorId?._id || course.instructorId || "",
+      batchNumber: course.batchNumber || "",
+      programType: course.programType || "Online",
+    });
+    setMessage("");
+    setError("");
+  };
+
+  // 2. Handles both Create and Update depending on isEditing state
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
     try {
-      // Create clean submission payload
       const submissionData = { ...formData };
-      
-      // OPTIONAL FIX: If no instructor is selected, pass null or delete it so backend validation passes
       if (!submissionData.instructorId) {
         submissionData.instructorId = null; 
       }
 
-      const res = await api.post("/course/create", submissionData);
-      setMessage(res.data?.message || "Course created successfully!");
-      setFormData(emptyForm);
-      const created = res.data?.data ?? res.data;
-      if (created) {
-        setCourses((prev) => [created, ...prev]);
+      if (isEditing) {
+        // UPDATE MODE
+        const res = await api.put(`/course/update/${isEditing}`, submissionData);
+        setMessage(res.data?.message || "Course updated successfully!");
+        
+        // Update item in local list state immediately
+        const updatedCourse = res.data?.data ?? res.data ?? submissionData;
+        setCourses((prev) =>
+          prev.map((c) => (c._id === isEditing ? { ...c, ...updatedCourse } : c))
+        );
+        
+        // Clear editing context states
+        setIsEditing(null);
+        setFormData(emptyForm);
+      } else {
+        // CREATE MODE
+        const res = await api.post("/course/create", submissionData);
+        setMessage(res.data?.message || "Course created successfully!");
+        setFormData(emptyForm);
+        const created = res.data?.data ?? res.data;
+        if (created) {
+          setCourses((prev) => [created, ...prev]);
+        }
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create course");
+      setError(err.response?.data?.message || "Failed to save course");
     }
   };
 
@@ -87,9 +120,18 @@ function ManageCourses() {
       await api.delete(`/course/${id}`);
       setCourses((prev) => prev.filter((course) => course._id !== id));
       setMessage("Course deleted.");
+      if (isEditing === id) {
+        setIsEditing(null);
+        setFormData(emptyForm);
+      }
     } catch {
       setError("Failed to delete course");
     }
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(null);
+    setFormData(emptyForm);
   };
 
   const columns = useMemo(
@@ -116,17 +158,33 @@ function ManageCourses() {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => (
-          <button
-            type="button"
-            className="admin-dangerBtn"
-            onClick={() => handleDelete(row.original._id)}
-          >
-            Delete
-          </button>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              className="admin-edit-btn"
+              style={{
+                padding: "4px 10px",
+                borderRadius: "6px",
+                border: "1px solid var(--bt-border)",
+                cursor: "pointer",
+                background: "#faf7f8"
+              }}
+              onClick={() => handleEdit(row.original)}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className="admin-dangerBtn"
+              onClick={() => handleDelete(row.original._id)}
+            >
+              Delete
+            </button>
+          </div>
         ),
       }),
     ],
-    []
+    [courses, isEditing] // Dependencies added to ensure up-to-date data triggers rendering
   );
 
   return (
@@ -142,7 +200,8 @@ function ManageCourses() {
       {error && <p className="admin-msg admin-msg--error">{error}</p>}
 
       <div className="admin-card">
-        <h3>Add a course</h3>
+        {/* Title text changes dynamically depending on context state */}
+        <h3>{isEditing ? "Modify course data" : "Add a course"}</h3>
         <form onSubmit={handleSubmit} className="admin-formGrid">
           <input
             type="text"
@@ -157,6 +216,14 @@ function ManageCourses() {
             name="courseCode"
             placeholder="Course Code"
             value={formData.courseCode}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="number"
+            name="coursePrice"
+            placeholder="Course Price"
+            value={formData.coursePrice}
             onChange={handleChange}
             required
           />
@@ -177,7 +244,6 @@ function ManageCourses() {
             required
           />
           
-          {/* FIXED: name mapped to instructorId, and inner string uses inst.fullName. removed 'required' */}
           <select
             name="instructorId" 
             value={formData.instructorId}
@@ -208,9 +274,17 @@ function ManageCourses() {
             <option value="In-person">In-person</option>
             <option value="Both">Both</option>
           </select>
-          <button type="submit" className="admin-primaryBtn">
-            Add Course
-          </button>
+          
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: "10px", marginTop: "0.5rem" }}>
+            <button type="submit" className="admin-primaryBtn">
+              {isEditing ? "Save Changes" : "Add Course"}
+            </button>
+            {isEditing && (
+              <button type="button" className="admin-ghostBtn" onClick={cancelEdit}>
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       </div>
 

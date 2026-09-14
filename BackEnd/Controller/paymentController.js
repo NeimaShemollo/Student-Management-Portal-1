@@ -92,6 +92,11 @@ export const reviewPayment = async (req, res) => {
         payment.status = status;
         const updatedPayment = await payment.save();
 
+        // 🌟 TRANSITION HOOK: If approved, unlock the student's dashboard access
+        if (status === "approved") {
+            await User.findByIdAndUpdate(payment.studentId, { isApproved: true });
+        }
+
         return res.status(200).json({
             message: `Payment status updated to: ${status}`,
             data: updatedPayment
@@ -102,6 +107,7 @@ export const reviewPayment = async (req, res) => {
         });
     }
 };
+
 
 export const getMyPayments = async (req, res) => {
     try {
@@ -135,6 +141,58 @@ export const getAllPayments = async (req, res) => {
 
         return res.status(200).json({
             data: payments
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
+export const getMyStatus = async (req, res) => {
+    try {
+        // req.user.id is supplied via your verifyAccessToken token middleware
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({
+                message: "Student account not found."
+            });
+        }
+
+        // Return the approval flag your frontend guard routes expect
+        return res.status(200).json({
+            isApproved: user.isApproved || false
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
+// Add this at the absolute bottom of your backend payment controller file
+export const getStudentCourses = async (req, res) => {
+    try {
+        // 1. Find all approved payments submitted by this logged-in student user
+        const approvedPayments = await Payment.find({
+            studentId: req.user.id,
+            status: "approved"
+        }).populate("courseId"); // Pulls the full course details from the courses collection
+
+        // 2. Filter out any duplicates to keep the list clean
+        const uniqueCourses = [];
+        const seenIds = new Set();
+
+        approvedPayments.forEach(p => {
+            if (p.courseId && !seenIds.has(p.courseId._id.toString())) {
+                seenIds.add(p.courseId._id.toString());
+                uniqueCourses.push(p.courseId);
+            }
+        });
+
+        // 3. Return the array to your frontend grid loader
+        return res.status(200).json({
+            data: uniqueCourses
         });
     } catch (error) {
         return res.status(500).json({

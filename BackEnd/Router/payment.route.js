@@ -5,6 +5,8 @@ import { verifyAccessToken,
 } from "../Middlewares/authMiddleware.js";
 
 import {
+    getStudentCourses,
+    getMyStatus,
     studentSubmitPayment,
     reviewPayment,
     getAllPayments,
@@ -50,3 +52,12 @@ paymentRoute.get(
     isAdmin,
     getAllPayments
 );
+
+paymentRoute.get(
+    "/my-status", 
+    verifyAccessToken, 
+    getMyStatus);
+paymentRoute.get(
+    "/student/my-courses", 
+    verifyAccessToken, 
+    getStudentCourses)
