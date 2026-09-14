@@ -5,6 +5,8 @@ export const getCourses = async () => {
   return await api.get("/course/view"); 
 };
 
+//  CORRECT OPTION A
 export const assignCourseToInstructor = async (instructorId, courseId) => {
-  return await api.patch(`/users/assign-course`, { instructorId, courseId });
+  return await api.post("/course/assign-course", { instructorId, courseId });
 };
+

@@ -164,3 +164,32 @@ export const getCourseDetail = async (req, res) => {
         });
     }
 };
+
+export const assignCourseToInstructor = async (req, res) => {
+  try {
+    const { instructorId, courseId } = req.body;
+
+    // 1. Verify if the course exists
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // 2. Verify if the instructor exists and has the correct role
+    const instructor = await User.findById(instructorId);
+    if (!instructor || instructor.role !== "instructor") {
+      return res.status(404).json({ message: "Instructor not found or invalid role" });
+    }
+
+    // 3. Assign the instructor to the course using your exact field name
+    course.instructorId = instructorId; 
+    await course.save();
+
+    res.status(200).json({
+      message: "Course successfully assigned to instructor",
+      data: course
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Internal server error" });
+  }
+}

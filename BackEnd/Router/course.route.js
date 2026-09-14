@@ -9,7 +9,8 @@ import {
     createCourse,
     updateCourse,
     getAllCourses,
-    deleteCourse
+    deleteCourse,
+    assignCourseToInstructor
 } from "../Controller/courseController.js";
 
 import { validate }
@@ -56,3 +57,6 @@ courseRoute.get(
     "/detail/:courseId",
      verifyAccessToken, 
      getCourseDetail);
+courseRoute.post(
+    "/assign-course",
+    assignCourseToInstructor)
