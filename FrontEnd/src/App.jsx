@@ -86,16 +86,15 @@ function AppContent() {
     <Route path="settings" element={<StudentSettings />} />
     <Route path="courses/:courseId" element={<CourseClassroom />} /> 
   </Route>
-                 
-<Route
-  path="/instructor"
+           <Route
+  path="/instructor-dashboard/:slug" // 1. Updated to match your path helper format
   element={
     <ProtectedRoute allowedRoles={["instructor"]}>
       <InstructorDashboard />
     </ProtectedRoute>
   }
 >
-  
+  {/* The nested routes stay exactly the same */}
   <Route index element={<InstructorOverview />} />
   
   <Route path="students" element={<div>Instructor Student List Page</div>} />
@@ -104,6 +103,7 @@ function AppContent() {
   <Route path="grades" element={<div>Instructor Grades Tracker</div>} />
   <Route path="attendance" element={<div>Instructor Attendance Logs</div>} />
 </Route>
+      
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import dotenv from "dotenv";
+
 import User from "../Model/usersModel.js"; // adjust path to match your project structure
+import dns from 'node:dns/promises'; dns.setServers(["1.1.1.1", "8.8.8.8"]);
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/your-db-name";
-
+const mongoURI = process.env.MONGO_URI;
+console.log("Your URI is:", MONGO_URI);
 const ADMIN_DATA = {
     fullName: process.env.ADMIN_NAME || "Super Admin",
     emailAddress: process.env.ADMIN_EMAIL || "admin@gmail.com",

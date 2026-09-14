@@ -4,7 +4,7 @@ import { login } from "../../service/authService.js";
 import { useAuthContext } from "../../contexts/useAuthContext.jsx";
  import { getStudentDashboardPath } from "../Student/studentPath.js";
 import { useNavigate, Link } from "react-router-dom";
-
+import { getInstructorDashboardPath } from "../Instructor/instructotPath.js";
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -22,13 +22,14 @@ function Login() {
       const loggedInUser = response.data.user;
       setUser(loggedInUser);
       setAccessToken(response.data.accessToken);
+       console.log("Logged in user role:", loggedInUser?.role);
 
       if (loggedInUser?.role === "admin") {
         navigate("/admin");
       } else if (loggedInUser?.role === "student") {
         navigate(getStudentDashboardPath(loggedInUser));
       } else if (loggedInUser?.role === "instructor") {
-        navigate("/instructor-dashboard");
+        navigate(getInstructorDashboardPath(loggedInUser));
       } else {
         navigate("/");
       }

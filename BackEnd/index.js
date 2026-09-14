@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import DBConnect from "./Config/dbConfig.js";
-
+import dns from 'node:dns/promises'; dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 import { userRoute } from "./Router/user.route.js";
 import { authRoute } from "./Router/auth.route.js";
@@ -25,6 +25,8 @@ app.use(
         
     })
 );
+
+
 
 // Routes
 app.use("/api/user", userRoute);

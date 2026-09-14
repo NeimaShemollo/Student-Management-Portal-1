@@ -1,16 +1,24 @@
 import "./instactor.css";
 import { Outlet, NavLink, Link } from "react-router-dom";
-
-const navItems = [
-  { to: "/instructor", label: "Dashboard", end: true }, // Added explicit Base Home Link
-  { to: "/instructor/students", label: "Students" },
-  { to: "/instructor/courses", label: "My Courses" },
-  { to: "/instructor/assignments", label: "Assignments" },
-  { to: "/instructor/grades", label: "Grades" },
-  { to: "/instructor/attendance", label: "Attendance" },
-];
+// 1. Double check the file spelling here (e.g., instructorPath if you renamed it)
+import { getInstructorDashboardPath } from "./instructotPath"; 
+// 2. Import your Auth Context to get the user's name/slug data
+import { useAuthContext } from "../../contexts/useAuthContext.jsx"; 
 
 function InstructorDashboard() {
+  // 3. Get the logged-in user object
+  const { user } = useAuthContext(); 
+
+  // 4. Dynamically generate the navigation paths based on this user
+  const navItems = [
+    { to: getInstructorDashboardPath(user), label: "Dashboard", end: true }, 
+    { to: getInstructorDashboardPath(user, "students"), label: "Students" },
+    { to: getInstructorDashboardPath(user, "courses"), label: "My Courses" },
+    { to: getInstructorDashboardPath(user, "assignments"), label: "Assignments" },
+    { to: getInstructorDashboardPath(user, "grades"), label: "Grades" },
+    { to: getInstructorDashboardPath(user, "attendance"), label: "Attendance" },
+  ];
+
   return (
     <div className="instructor-layout">
       {/* Sidebar Container */}
@@ -28,7 +36,7 @@ function InstructorDashboard() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.end} // Ensures active highlighted link works precisely
+              end={item.end} 
               className={({ isActive }) => `instructor-navLink${isActive ? " active" : ""}`}
             >
               <span className="instructor-navDot" aria-hidden="true" />
@@ -39,7 +47,8 @@ function InstructorDashboard() {
 
         <div className="instructor-sidebarFoot">
           <strong>Bright tech</strong>
-          <p>Instructor workspace</p>
+          {/* Displaying actual user name dynamically */}
+          <p>{user?.fullName || "Instructor workspace"}</p> 
         </div>
       </aside>
 
@@ -53,7 +62,7 @@ function InstructorDashboard() {
           <div className="instructor-headerBadge">● Instructor</div>
         </header>
 
-        {/* Dynamic Outlet mount frame (Stat cards are gone from layout) */}
+        {/* Dynamic Outlet mount frame */}
         <div className="instructor-contentArea">
           <Outlet />
         </div>
@@ -63,3 +72,4 @@ function InstructorDashboard() {
 }
 
 export default InstructorDashboard;
+
