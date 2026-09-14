@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.warn("Warning: EMAIL_USER or EMAIL_PASS environment variables are missing.");
 }
+
 export const transport = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -12,9 +13,12 @@ export const transport = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // App Password generated from Google Account
   },
-  // Optional: helps prevent ECONNRESET issues in long-running Node processes
   pool: true,
   maxConnections: 5,
+  // ADD THIS BLOCK TO BYPASS THE SELF-SIGNED CERTIFICATE ERROR
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 const sendEmail = async (to, subject, text, html = null) => {
@@ -24,7 +28,7 @@ const sendEmail = async (to, subject, text, html = null) => {
       to,
       subject,
       text,
-      ...(html && { html }), // Attach HTML payload if provided
+      ...(html && { html }),
     };
 
     const info = await transport.sendMail(mailOptions);

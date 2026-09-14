@@ -50,6 +50,7 @@ userRoute.get(
     isAdmin,
     getAllInstructors
 );
+
 userRoute.post(
     "/register-staff",
     verifyAccessToken,
