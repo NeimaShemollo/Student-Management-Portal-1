@@ -84,7 +84,8 @@ function ManageCourses() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     try {
-      await api.delete(`/course/${id}`);
+      //updated:added/delete/segment
+      await api.delete(`/course/delete/${id}`);
       setCourses((prev) => prev.filter((course) => course._id !== id));
       setMessage("Course deleted.");
     } catch {

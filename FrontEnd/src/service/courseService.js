@@ -1,7 +1,8 @@
 import { api } from "./axiosInstance.js";
 
 export const getCourses = async () => {
-  return await api.get("/courses");
+  // UPDATED: changed from /courses to /course/view
+  return await api.get("/course/view"); 
 };
 
 export const assignCourseToInstructor = async (instructorId, courseId) => {

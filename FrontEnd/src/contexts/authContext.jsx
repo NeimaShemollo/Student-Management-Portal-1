@@ -40,6 +40,15 @@ export const AuthContextProvider = ({ children }) => {
         setAccessToken(accessToken);
         if (userData) setUser(userData);
       } catch (error) {
+        //check if the backend id down or unreachable
+        if(!error.reponse || error.code === "ERR_NETWORK" || error.code === 'ECONNABORTED'){
+          console.warn("backend server unreachable .keeping existing session state.")
+
+//stop excute without clearing user or access token
+return
+        }
+        
+        //only clear token
         // Refresh token is missing or expired -> clear in-memory state
         setAccessToken(null);
         setUser(null);

@@ -4,6 +4,7 @@ import toSafeUser from "../utils/toSafeUser.js";
 import sendEmail, {transport} from "../utils/sendEmail.js";
 import Course from "../Model/courseModel.js"
 
+
 export const register = async (req, res) => {
     try {
         const {
@@ -129,37 +130,33 @@ export const getAllStudents = async (req, res) => {
 
 
 
+
+
+
 export const getAllInstructors = async (req, res) => {
-    try {
-        // 1. Fetch instructors exactly how you did before
-        const instructors = await User
-            .find({ role: "instructor" })
-            .select("-password -passwordResetToken -passwordResetExpires");
+  try {
+    const instructors = await User.find({ role: "instructor" })
+      .select("-password")
+      .lean();
 
-        // 2. Loop through each instructor to count their courses simultaneously
-        const instructorsWithCounts = await Promise.all(
-            instructors.map(async (instructor) => {
-                const count = await Course.countDocuments({ instructorId: instructor._id });
-                
-                // Convert the Mongoose document to a plain object and add courseCount
-                return {
-                    ...instructor.toObject(),
-                    courseCount: count
-                };
-            })
-        );
+    const instructorsWithCounts = await Promise.all(
+      instructors.map(async (instructor) => {
+        // Use the Mongoose Course model here:
+        const count = await Course.countDocuments({ instructorId: instructor._id });
+        return {
+          ...instructor,
+          courseCount: count,
+        };
+      })
+    );
 
-        // 3. Return the updated data payload to the frontend
-        return res.status(200).json({
-            data: instructorsWithCounts
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            message: error.message
-        });
-    }
+    return res.status(200).json({ data: instructorsWithCounts });
+  } catch (error) {
+    console.error("getAllInstructors error:", error);
+    return res.status(500).json({ message: error.message });
+  }
 };
+
 
 export const registerUserByAdmin =async (req,res) => {
     try {

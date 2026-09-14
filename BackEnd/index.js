@@ -12,6 +12,7 @@ import { paymentRoute } from "./Router/payment.route.js";
 import cookieParser from "cookie-parser";
 
 
+
 const app = express();
 
 // Middleware
@@ -30,6 +31,7 @@ app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/course", courseRoute);
 app.use("/api/payment", paymentRoute);
+
 
 // Error handler
 app.use((err, req, res, next) => {
