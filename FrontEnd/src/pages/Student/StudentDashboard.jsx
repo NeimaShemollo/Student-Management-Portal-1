@@ -17,7 +17,7 @@ const navItems = [
   
 ];
 
-function StudentSection({ title, lead }) {
+export function StudentSection({ title, lead }) {
   return (
     <section className="student-panel">
       <header className="student-header">
@@ -385,7 +385,7 @@ export function StudentSettings() {
       
       const payload = { currentPassword, newPassword };
       // Connects to your standard /users/update-password backend security profile endpoints 
-      const res = await api.put("/users/update-password", payload); 
+      const res = await api.put("/user/update-password", payload); 
       
       setMessage(res.data?.message || "Security credentials updated successfully!");
       setCurrentPassword("");
