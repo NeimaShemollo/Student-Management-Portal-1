@@ -1,0 +1,5 @@
+.manage-courses-page .admin-formGrid .admin-primaryBtn {
+  grid-column: 1 / -1;
+  width: fit-content;
+  min-width: 160px;
+}

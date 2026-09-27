@@ -1,0 +1,330 @@
+import bcrypt from "bcrypt";
+import User from "../Model/usersModel.js";
+import toSafeUser from "../utils/toSafeUser.js";
+import sendEmail from "../utils/sendEmail.js";
+import Course from "../Model/courseModel.js"
+import { clearCourseCache } from "../Middlewares/cacheMiddleware.js";
+
+export const register = async (req, res) => {
+    try {
+        const {
+            emailAddress,
+            password,
+            phone,
+            role,
+            status,
+            passwordResetToken,
+            passwordResetExpires,
+            ...otherData
+        } = req.body;
+
+        const existingUser = await User.findOne({
+            $or: [
+                { emailAddress },
+                { phone }
+            ]
+        });
+
+        if (existingUser) {
+            const field =
+                existingUser.emailAddress === emailAddress
+                    ? "Email"
+                    : "Phone";
+            return res.status(400).json({
+                message: `${field} already exists`
+            });
+        }
+
+        const hashedPassword =
+            await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            ...otherData,
+            emailAddress,
+            phone,
+            password: hashedPassword,
+        });
+
+        return res.status(201).json({
+            message: "User registered successfully",
+            data: toSafeUser(newUser)
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: "Server error"
+        });
+    }
+};
+
+
+export const viewUser = async (req, res) => {
+    try {
+        const users = await User
+            .find()
+            .select("-password");
+
+        return res.status(200).json({
+            data: users
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error"
+        });
+    }
+};
+
+
+export const updateUser = async (req, res) => {
+    try {
+        const data = req.body;
+
+        const updatedUser =
+            await User.findOneAndUpdate(
+                { phone: data.phone },
+                { $set: data },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            ).select("-password");
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                message: "Phone number not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Successfully updated",
+            data: updatedUser
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error"
+        });
+    }
+};
+
+
+export const getAllStudents = async (req, res) => {
+    try {
+        const students = await User
+            .find({ role: "student" })
+            .select("-password");
+
+        return res.status(200).json({
+            data: students
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
+
+
+
+
+
+export const getAllInstructors = async (req, res) => {
+  try {
+    const instructors = await User.find({ role: "instructor" })
+      .select("-password")
+      .lean();
+
+    const instructorsWithCounts = await Promise.all(
+      instructors.map(async (instructor) => {
+        // Use the Mongoose Course model here:
+        const count = await Course.countDocuments({ instructorId: instructor._id });
+        return {
+          ...instructor,
+          courseCount: count,
+        };
+      })
+    );
+
+    return res.status(200).json({ data: instructorsWithCounts });
+  } catch (error) {
+    console.error("getAllInstructors error:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const registerUserByAdmin = async (req, res) => {
+    try {
+        const {
+            emailAddress,
+            phone,
+            role,
+            passwordResetToken,
+            passwordResetExpires,
+            selectSupportType, // Pull this out to intercept the enum mismatch
+            ...otherData
+        } = req.body;
+
+        const allowedRoles = ["instructor", "student"];
+        if (!allowedRoles.includes(role)) {
+            return res.status(400).json({
+                message: "Role must be instructor or student"
+            });
+        }
+
+        const existUser = await User.findOne({
+            $or: [
+                { emailAddress: emailAddress.toLowerCase().trim() },
+                { phone: phone }
+            ]
+        });
+        
+        if (existUser) {
+            return res.status(400).json({ message: "User with this email or phone already exists" });
+        } 
+
+        const structuredSupportType = Array.isArray(selectSupportType) 
+            ? selectSupportType 
+            : selectSupportType ? [selectSupportType] : ["Online"];
+
+        const tempPassword = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+        
+        const newUser = await User.create({
+            emailAddress: emailAddress.toLowerCase().trim(),
+            phone,
+            password: hashedPassword,
+            role,
+            selectSupportType: structuredSupportType,
+            ...otherData
+        });
+
+        const emailSubject = "Your Account Credentials";
+        const emailText = `Hello,\n\nYour account has been successfully created. Your temporary password is: ${tempPassword}\n\nPlease log in and update your password immediately.`;
+
+        try {
+            await sendEmail(emailAddress, emailSubject, emailText);
+        } catch (mailError) {
+            console.error("⚠️ Background SMTP Delivery Failure:", mailError.message);
+        }
+
+        console.log(`🔑 DEV ACCESS KEY: Temporary password for ${emailAddress} is: ${tempPassword}`);
+
+        return res.status(201).json({
+            message: "User registered successfully and temporary password sent via email",
+            user: { _id: newUser._id, emailAddress, role }
+        });
+
+    } catch (error) {
+        console.error("Staff Registration Failure:", error.message);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+export const getStudent = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select(
+            "-password -passwordResetToken -passwordResetExpires"
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (user.role !== "student") {
+            return res.status(403).json({
+                message: "Access denied. Student only."
+            });
+        }
+
+        return res.status(200).json({
+            message: "Student found",
+            user: toSafeUser(user)
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Server error"
+        });
+    }
+};
+export const updateUserStatus = async (req, res) => {
+    try {
+        const { id } = req.params; 
+        const { status } = req.body; // Expecting "active", "blocked", or "finished"
+
+        // Match the lowercase enum array
+        const allowedStatuses = ["active", "blocked", "finished","left"];
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid status value. Must be active, blocked, or finished."
+            });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { status: status },
+            { new: true, runValidators: true }
+        ).select("-password -passwordResetToken -passwordResetExpires");
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+            message: `User status successfully updated to ${status}`,
+            user: toSafeUser(updatedUser)
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+export const updateInstructorStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const updatedUser = await User.findByIdAndUpdate(id, { status }, { new: true });
+        if (!updatedUser) return res.status(404).json({ message: "Instructor not found" });
+
+        // 🔥 PLACE IT HERE: Wipes out the stale memory cache lines instantly!
+        clearCourseCache(); 
+
+        return res.status(200).json({ message: "Status updated successfully!", data: updatedUser });
+    } catch (error) { return res.status(500).json({ message: error.message }); }
+};
+
+// 🌟 3. INSIDE YOUR UPDATE PROFILE CONTROLLER
+export const updateInstructorProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const updatedUser = await User.findByIdAndUpdate(id, { $set: req.body }, { new: true });
+        
+        // 🔥 PLACE IT HERE: Ensures the cache resets so the frontend table displays edited names/phones!
+        clearCourseCache(); 
+
+        return res.status(200).json({ message: "Profile updated successfully!", data: updatedUser });
+    } catch (error) { return res.status(500).json({ message: error.message }); }
+};
+
+// 🌟 4. INSIDE YOUR DELETE CONTROLLER
+export const deleteInstructor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User.findByIdAndDelete(id);
+
+        // 🔥 PLACE IT HERE: Removes the deleted instructor records from RAM immediately
+        clearCourseCache(); 
+
+        return res.status(200).json({ message: "Instructor deleted successfully." });
+    } catch (error) { return res.status(500).json({ message: error.message }); }
+};

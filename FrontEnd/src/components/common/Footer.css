@@ -1,0 +1,51 @@
+.site-footer {
+  --bt-maroon: #780d31;
+  --bt-ink: #1a1216;
+  --bt-muted: #5c5260;
+  --bt-border: rgba(120, 13, 49, 0.12);
+  --bt-canvas: #faf7f8;
+
+  width: 100%;
+  margin-top: auto;
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  background: #fff;
+  border-top: 1px solid var(--bt-border);
+  box-sizing: border-box;
+  font-family: "Figtree", sans-serif;
+}
+
+.site-footerBrand {
+  margin: 0 0 0.45rem;
+  font-family: "Syne", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--bt-ink);
+}
+
+.site-footerBrand span {
+  color: var(--bt-maroon);
+}
+
+.site-footerCopy {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bt-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .site-footer {
+    padding: 1.75rem 1.15rem;
+  }
+
+  .site-footerBrand {
+    font-size: 1.05rem;
+  }
+
+  .site-footerCopy {
+    font-size: 0.8rem;
+  }
+}
