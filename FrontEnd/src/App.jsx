@@ -3,7 +3,7 @@ import "./App.css";
 import Homepage from "./pages/Home/Homepage.jsx";
 import About from "./pages/Home/About.jsx";
 import Courses from "./pages/Home/Courses.jsx";
-import CourseDetail from "./pages/Course/CourseDetail.jsx";
+import CourseDetail from "./pages/Home/CourseDetail.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Register from "./pages/Auth/Register.jsx";
 import ForgotPassword from "./pages/Auth/ForgotPassword";

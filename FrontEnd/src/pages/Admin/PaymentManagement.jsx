@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateColumnHelper } from "@tanstack/react-table";
-import DataTable from "../../components/admin/DataTable";
+import { createColumnHelper } from "@tanstack/react-table";
+import DataTable from "../../components/admin/DataTable.jsx";
 import {
   formatPaymentStatus,
   getAllPayments,
@@ -11,7 +11,7 @@ import {
 import "./AdminShared.css";
 import "./PaymentManagement.css";
 
-const columnHelper = CreateColumnHelper();
+const columnHelper = createColumnHelper();
 
 function PaymentManagement() {
   const [payments, setPayments] = useState([]);

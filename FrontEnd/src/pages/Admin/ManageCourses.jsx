@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { CreateColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { api } from "../../service/axiosInstance";
 import DataTable from "../../components/admin/DataTable";
 import "./AdminShared.css";
 import "./ManageCourses.css";
 
-const columnHelper = CreateColumnHelper();
+const columnHelper = createColumnHelper();
 
 const emptyForm = {
   title: "",         
