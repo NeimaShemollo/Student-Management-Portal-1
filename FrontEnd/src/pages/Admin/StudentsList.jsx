@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { createColumnHelper } from "@tanstack/react-table"; // 🌟 FIXED: Lowercase 'createColumnHelper'
+import { useEffect, useState } from "react";
 import { getStudents } from "../../service/userService.js";
 import { api } from "../../service/axiosInstance.js"; 
-import DataTable from "../../components/admin/DataTable.jsx";
 import "./AdminShared.css";
-
-const columnHelper = createColumnHelper(); // 🌟 FIXED: Matches corrected lowercase import mapping
 
 function StudentsList() {
   const [students, setStudents] = useState([]);
@@ -13,19 +9,21 @@ function StudentsList() {
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState(null); 
 
+  // Search Filtering State
+  const [searchTerm, setSearchFilter] = useState("");
+
   // States for Editing Student Profiles
   const [editingStudent, setEditingStudent] = useState(null);
   const [editForm, setEditForm] = useState({ fullName: "", phone: "", academicBackground: "" });
   const [savingEdit, setSavingEdit] = useState(false);
 
-    
+  // Sync data on component mount
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError("");
         
-        // Execute your api request
         const res = await getStudents();
         const rows = res.data?.data ?? res.data ?? [];
         
@@ -38,14 +36,12 @@ function StudentsList() {
     })();
   }, []); 
 
-
-  // 🌟 FIXED: Changed API endpoint string path from '/users/status/' to '/user/status/'
+  // Status dropdown change handler
   const handleStatusChange = async (studentId, newStatus) => {
     setUpdatingId(studentId);
     setError("");
     try {
       await api.patch(`/user/status/${studentId}`, { status: newStatus });
-      
       setStudents((prev) =>
         prev.map((student) =>
           student._id === studentId ? { ...student, status: newStatus } : student
@@ -58,7 +54,7 @@ function StudentsList() {
     }
   };
 
-  // 🌟 ADDED: Handle updating student fields submission
+  // Profile update handler
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editingStudent) return;
@@ -79,7 +75,7 @@ function StudentsList() {
     }
   };
 
-  // 🌟 ADDED: Secure delete request pipeline
+  // Student permanent account deletion handler
   const handleDeleteStudent = async (studentId) => {
     if (!window.confirm("Are you sure you want to permanently delete this student account?")) return;
     setError("");
@@ -100,127 +96,126 @@ function StudentsList() {
     }
   };
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("fullName", {
-        header: "Name",
-        cell: (info) => <strong>{info.getValue() || "—"}</strong>,
-      }),
-      columnHelper.accessor("emailAddress", {
-        header: "Email",
-        cell: (info) => info.getValue() || "—",
-      }),
-      columnHelper.accessor("phone", {
-        header: "Phone",
-        cell: (info) => info.getValue() || "—",
-      }),
-      columnHelper.accessor("academicBackground", {
-        header: "Academic Level",
-        cell: (info) => info.getValue() || "—",
-      }),
-      columnHelper.accessor("status", {
-        header: "Status",
-        cell: (info) => {
-          const currentStatus = info.getValue() || "active";
-          return (
-            <span className={`admin-statusBadge ${getStatusBadgeClass(currentStatus)}`} style={{ textTransform: "capitalize" }}>
-              {currentStatus === "active" ? "Active" : currentStatus === "blocked" ? "Suspended" : "Finished"}
-            </span>
-          );
-        },
-      }),
-      columnHelper.accessor("status", {
-        id: "statusAction",
-        header: "Change Status",
-        cell: (info) => {
-          const student = info.row.original;
-          return (
-            <select
-              value={info.getValue() || "active"}
-              disabled={updatingId === student._id}
-              onChange={(e) => handleStatusChange(student._id, e.target.value)}
-              className="admin-statusSelect"
-              style={{
-                padding: "0.3rem 0.5rem",
-                borderRadius: "6px",
-                border: "1px solid var(--bt-border)",
-                cursor: "pointer",
-                backgroundColor: updatingId === student._id ? "#f0f0f0" : "#fff"
-              }}
-            >
-              <option value="active">Active</option>
-              <option value="blocked">Suspend Access</option>
-              <option value="finished">Finished Course</option>
-            </select>
-          );
-        },
-      }),
-      // 🌟 ADDED: Dedicated Management Action Operations Column
-      columnHelper.accessor("_id", {
-        id: "managementActions",
-        header: "Actions",
-        cell: (info) => {
-          const student = info.row.original;
-          return (
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <button
-                type="button"
-                style={{ background: "#007bff", color: "#fff", border: "none", padding: "5px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}
-                onClick={() => {
-                  setEditingStudent(student);
-                  setEditForm({ 
-                    fullName: student.fullName || "", 
-                    phone: student.phone || "",
-                    academicBackground: student.academicBackground || ""
-                  });
-                }}
-              >
-                ✏️ Edit
-              </button>
-              <button
-                type="button"
-                style={{ background: "#dc3545", color: "#fff", border: "none", padding: "5px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}
-                onClick={() => handleDeleteStudent(student._id)}
-              >
-                🗑️ Delete
-              </button>
-            </div>
-          );
-        }
-      })
-    ],
-    [updatingId] 
-  );
+  // Filter list rows based on search input metrics dynamically
+  const filteredStudents = students.filter((stu) => {
+    const searchString = searchTerm.toLowerCase();
+    return (
+      stu.fullName?.toLowerCase().includes(searchString) ||
+      stu.emailAddress?.toLowerCase().includes(searchString) ||
+      stu.phone?.includes(searchString)
+    );
+  });
 
   if (loading) {
     return (
       <div className="admin-page">
-        <p className="admin-pageLead">Loading students…</p>
+        <p className="admin-pageLead">Launching active workspace data links...</p>
       </div>
     );
   }
 
-    return (
+   return (
     <div className="admin-page students-page">
       <div>
         <h2 className="admin-pageTitle">Registered Students</h2>
-        <p className="admin-pageLead">
-          Search, sort, update profiles, and manage active student platform clearance.
-        </p>
+        <p className="admin-pageLead">Manage your student registry profiles, credentials, and access permissions live.</p>
       </div>
 
       {error && <p className="admin-msg admin-msg--error">{error}</p>}
 
-      <div className="admin-card">
-        <DataTable
-          data={students}
-          columns={columns}
-          searchPlaceholder="Search students…"
-          emptyMessage="No students found."
+      {/* Modern Search Filter bar Element */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <input
+          type="text"
+          placeholder="Search students by name, email, or phone..."
+          value={searchTerm}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          style={{ padding: "0.65rem 1rem", width: "100%", maxWidth: "360px", borderRadius: "8px", border: "1px solid rgba(120,13,49,0.12)", fontSize: "0.9rem" }}
         />
       </div>
 
-      {/* 🌟 FIXED: Corrected conditional syntax wrapper block for the Student Update Form Modal */}
+      {/* 🌟 NATIVE HIGH-PERFORMANCE DATA TABLE GRID */}
+      <div className="admin-card" style={{ padding: "1.5rem", overflowX: "auto", background: "#fff", borderRadius: "12px" }}>
+        <table className="student-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "2px solid rgba(120,13,49,0.12)", background: "#fbfbfc" }}>
+              <th style={{ padding: "12px", textAlign: "left" }}>Name</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Email</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Phone</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>Academic Level</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>Status</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>Portal Access Config</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>Management Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStudents.length > 0 ? (
+              filteredStudents.map((stu) => (
+                <tr key={stu._id} style={{ borderBottom: "1px solid rgba(120,13,49,0.12)" }}>
+                  <td style={{ padding: "12px" }}><strong>{stu.fullName || "—"}</strong></td>
+                  <td style={{ padding: "12px" }}>{stu.emailAddress || "—"}</td>
+                  <td style={{ padding: "12px" }}>{stu.phone || "—"}</td>
+                  <td style={{ padding: "12px", textAlign: "center" }}>
+                    <span style={{ fontSize: "0.85rem", background: "#f1f3f5", padding: "4px 8px", borderRadius: "4px", fontWeight: "500" }}>
+                      {stu.academicBackground || "General"}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px", textAlign: "center" }}>
+                    <span className={`admin-statusBadge ${getStatusBadgeClass(stu.status || "active")}`}>
+                      {stu.status === "blocked" ? "Suspended" : stu.status === "finished" ? "Finished" : "Active"}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px", textAlign: "center" }}>
+                    <select
+                      value={stu.status || "active"}
+                      disabled={updatingId === stu._id}
+                      onChange={(e) => handleStatusChange(stu._id, e.target.value)}
+                      style={{ padding: "0.4rem", borderRadius: "6px", border: "1px solid rgba(120,13,49,0.12)", cursor: "pointer" }}
+                    >
+                      <option value="active">Active</option>
+                      <option value="blocked">Suspend Access</option>
+                      <option value="finished">Finished Course</option>
+                    </select>
+                  </td>
+                  <td style={{ padding: "12px", textAlign: "center" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                      <button
+                        type="button"
+                        style={{ background: "#007bff", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" }}
+                        onClick={() => {
+                          setEditingStudent(stu);
+                          setEditForm({ 
+                            fullName: stu.fullName || "", 
+                            phone: stu.phone || "",
+                            academicBackground: stu.academicBackground || ""
+                          });
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: "#dc3545", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" }}
+                        onClick={() => handleDeleteStudent(stu._id)}
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} style={{ textAlign: "center", padding: "2rem", color: "var(--bt-muted)" }}>
+                  No student records matched your current filter criteria parameters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* MODAL OVERLAY UPDATE PROFILE WINDOW */}
       {editingStudent && (
         <div className="admin-modalOverlay" style={modalStyles.overlay}>
           <div className="admin-modalCard" style={modalStyles.card}>
@@ -251,7 +246,6 @@ function StudentsList() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <label style={{ fontSize: "0.85rem", fontWeight: "600" }}>Academic Background</label>
-                {/* 🌟 FIXED: Safely closed the dropdown element tag structure here */}
                 <select
                   value={editForm.academicBackground}
                   onChange={(e) => setEditForm({ ...editForm, academicBackground: e.target.value })}
@@ -267,7 +261,6 @@ function StudentsList() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
-                {/* 🌟 FIXED: Added spaces to element attributes and closed button blocks correctly */}
                 <button
                   type="button"
                   onClick={() => setEditingStudent(null)}
@@ -292,17 +285,11 @@ function StudentsList() {
   );
 }
 
-// Inline Styles for Modal Backdrops
 const modalOverlayStyle = {
   position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  top: 0, left: 0, right: 0, bottom: 0,
   backgroundColor: "rgba(0,0,0,0.4)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  display: "flex", alignItems: "center", justifyContent: "center",
   zIndex: 1000,
 };
 
@@ -312,12 +299,9 @@ const modalStyles = {
     background: "#fff",
     padding: "1.75rem",
     borderRadius: "16px",
-    width: "100%",
-    maxWidth: "450px",
+    width: "100%", maxWidth: "450px",
     boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
   }
 };
 
 export default StudentsList;
-
-   

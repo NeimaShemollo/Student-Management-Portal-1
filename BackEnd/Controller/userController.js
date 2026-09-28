@@ -191,7 +191,7 @@ export const registerUserByAdmin = async (req, res) => {
             ? selectSupportType 
             : selectSupportType ? [selectSupportType] : ["Online"];
 
-        const tempPassword = Math.random().toString(36).slice(-8);
+               const tempPassword = Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
         
         const newUser = await User.create({
@@ -203,11 +203,28 @@ export const registerUserByAdmin = async (req, res) => {
             ...otherData
         });
 
-        const emailSubject = "Your Account Credentials";
-        const emailText = `Hello,\n\nYour account has been successfully created. Your temporary password is: ${tempPassword}\n\nPlease log in and update your password immediately.`;
+        // 🌟 THE INBOX REPAIR: Build a professional HTML layout template
+        const emailSubject = "Welcome to Bright Tech Academy - Your Account Credentials";
+        const emailText = `Hello, Your account has been successfully created. Your temporary password is: ${tempPassword}. Please log in and update your password immediately.`;
+        
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #780d31; border-radius: 8px; max-width: 500px; margin: 0 auto;">
+            <h2 style="color: #780d31; margin-top: 0;">Welcome to Bright Tech Academy!</h2>
+            <p>Hello <strong>${otherData.fullName || 'User'}</strong>,</p>
+            <p>Your portal account profile has been successfully configured as an <strong>${role.toUpperCase()}</strong>.</p>
+            <p>Use these temporary automated credentials to access your classroom dashboard:</p>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #eef2f7;">
+              <p style="margin: 4px 0;"><strong>Portal Login:</strong> <a href="http://localhost:5173/login" style="color: #007bff;">Click Here to Login</a></p>
+              <p style="margin: 4px 0;"><strong>Username / Email:</strong> ${emailAddress}</p>
+              <p style="margin: 4px 0;"><strong>Temporary Password:</strong> <code style="font-size: 1.1rem; color: #dc3545; background: #fff; padding: 2px 6px; border: 1px solid #ddd; border-radius: 4px; font-weight: bold;">${tempPassword}</code></p>
+            </div>
+            <p style="color: #6c757d; font-size: 0.85rem; font-style: italic;">⚠️ For account security, please update this temporary password immediately inside your Settings page upon your first login.</p>
+          </div>
+        `;
 
         try {
-            await sendEmail(emailAddress, emailSubject, emailText);
+            // 🌟 FIXED: Passed 'emailHtml' as the 4th argument so your sendEmail helper uses it
+            await sendEmail(emailAddress, emailSubject, emailText, emailHtml);
         } catch (mailError) {
             console.error("⚠️ Background SMTP Delivery Failure:", mailError.message);
         }
@@ -218,6 +235,7 @@ export const registerUserByAdmin = async (req, res) => {
             message: "User registered successfully and temporary password sent via email",
             user: { _id: newUser._id, emailAddress, role }
         });
+
 
     } catch (error) {
         console.error("Staff Registration Failure:", error.message);
