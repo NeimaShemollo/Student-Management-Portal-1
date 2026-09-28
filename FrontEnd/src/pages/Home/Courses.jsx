@@ -2,44 +2,39 @@ import SiteNav from "../../components/common/SiteNav.jsx";
 import { useState, useEffect } from "react";
 import HomeCard from "../../components/common/HomeCard.jsx";
 import { api } from "../../service/axiosInstance.js";
-
 import "./Courses.css";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // States to check user roles and open the upload form
   const [showCreateForm, setShowCreateForm] = useState(false);
-  // 1. Initialize the state directly by reading localStorage immediately
-const [isAdmin] = useState(() => {
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    const parsedUser = JSON.parse(savedUser);
-    return parsedUser.role === "admin"; // Returns true or false directly
-  }
-  return false;
-});
 
-
-// 2. Your useEffect now handles ONLY the network data synchronization stream
-useEffect(() => {
-  const fetchCourses = async () => {
-    try {
-      const res = await api.get("/course/view");
-      const courseList = res.data?.data ?? res.data ?? [];
-      setCourses(Array.isArray(courseList) ? courseList : []);
-    } catch (err) {
-      console.error("Failed to load courses:", err);
-      setError('loading course failed');
-    } finally {
-      setLoading(false);
+  // Initialize the state directly by reading localStorage immediately
+  const [isAdmin] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      return parsedUser.role === "admin";
     }
-  };
+    return false;
+  });
 
-  fetchCourses();
-}, []); 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await api.get("/course/view");
+        const courseList = res.data?.data ?? res.data ?? [];
+        setCourses(Array.isArray(courseList) ? courseList : []);
+      } catch (err) {
+        console.error("Failed to load courses:", err);
+        setError('loading course failed');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []); 
 
   return (
     <div className="courses-page">
@@ -49,7 +44,6 @@ useEffect(() => {
         <h1>Our Courses</h1>
         <p>Pick a course to see what it covers.</p>
         
-        {/* 3. Show 'Add Course' button ONLY if the logged in user is an admin */}
         {isAdmin && (
           <button 
             className="admin-toggle-btn"
@@ -65,14 +59,22 @@ useEffect(() => {
       {error && <p className="error-state">{error}</p>}
 
       {!loading && !error && (
-        <div className="courses-grid">
-          {courses.length > 0 ? (
-            courses.map((course) => (
-              <HomeCard key={course._id || course.id} course={course} />
-            ))
-          ) : (
-            <p>No courses available right now.</p>
-          )}
+        <div className="courses-container" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+          
+          {/* 🌟 THE INDICATOR: Clean, user-friendly informational tip banner */}
+          <div className="course-click-indicator" style={{ background: "#fbf8f9", border: "1px dashed rgba(120,13,49,0.2)", padding: "12px", borderRadius: "8px", textAlign: "center", marginBottom: "1.5rem", color: "#780d31", fontWeight: "600", fontSize: "0.92rem" }}>
+            💡 Tip: Click on any course card below to read its full description, curriculum syllabus, and requirements!
+          </div>
+
+          <div className="courses-grid">
+            {courses.length > 0 ? (
+              courses.map((course) => (
+                <HomeCard key={course._id || course.id} course={course} />
+              ))
+            ) : (
+              <p>No courses available right now.</p>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -80,4 +82,3 @@ useEffect(() => {
 }
 
 export default Courses;
-

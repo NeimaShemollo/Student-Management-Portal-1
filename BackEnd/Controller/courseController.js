@@ -49,7 +49,6 @@ export const createCourse = async (req, res) => {
     } catch (error) {
         console.error("Backend Course Creation Error:", error.message);
         
-        // Handle unique courseCode collisions cleanly
         if (error.code === 11000) {
             return res.status(400).json({ message: "A course with this Course Code already exists." });
         }
