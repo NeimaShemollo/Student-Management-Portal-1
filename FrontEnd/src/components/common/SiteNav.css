@@ -1,0 +1,224 @@
+.site-nav {
+  --bt-maroon: #780d31;
+  --bt-maroon-deep: #5a0a25;
+  --bt-ink: #1a1216;
+  --bt-muted: #5c5260;
+  --bt-border: rgba(120, 13, 49, 0.12);
+
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.1rem clamp(1.25rem, 4vw, 3.5rem);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bt-border);
+  font-family: "Figtree", sans-serif;
+  box-sizing: border-box;
+}
+
+.site-nav *,
+.site-nav *::before,
+.site-nav *::after {
+  box-sizing: border-box;
+}
+
+.site-brand {
+  font-family: "Syne", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--bt-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-brandAccent {
+  color: var(--bt-maroon);
+}
+
+/* Base desktop wrapper for layout container grouping entries */
+.site-navContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  margin-left: 2.5rem;
+}
+
+.site-navLinks {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-navLinks a {
+  color: var(--bt-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.site-navLinks a:hover,
+.site-navLinks a.active {
+  color: var(--bt-maroon);
+}
+
+.site-navActions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.site-btnPrimary,
+.site-btnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.site-btnPrimary {
+  background: var(--bt-maroon);
+  color: #fff;
+  padding: 0.65rem 1.35rem;
+  box-shadow: 0 8px 24px rgba(120, 13, 49, 0.28);
+}
+
+.site-btnPrimary:hover {
+  background: var(--bt-maroon-deep);
+  transform: translateY(-1px);
+}
+
+.site-btnGhost {
+  background: transparent;
+  color: var(--bt-ink);
+  padding: 0.55rem 0.9rem;
+}
+
+.site-btnGhost:hover {
+  color: var(--bt-maroon);
+}
+
+/* Hide hamburger toggle on normal standard monitors and screen frames */
+.site-navToggle {
+  display: none;
+}
+
+/* ==========================================================================
+   📱 RESPONSIVE LAYOUT MATRIX (Screens below 900px wide)
+   ========================================================================== */
+@media (max-width: 900px) {
+  
+  /* 🍔 REVEAL HAMBURGER DRAWER BUTTON SELECTOR */
+  .site-navToggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 30;
+  }
+
+  .navToggle-bar {
+    width: 100%;
+    height: 2px;
+    background-color: var(--bt-ink);
+    border-radius: 2px;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  /* Morph bars cleanly into an animated 'X' sign close toggle when active */
+  .site-navToggle.is-active .navToggle-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .site-navToggle.is-active .navToggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .site-navToggle.is-active .navToggle-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* 🌟 CONVERT DESKTOP NAVIGATION INTO COHESIVE MOBILE SLIDE DRAWER PANEL */
+  .site-navContent {
+    position: absolute;
+    top: 100%; /* Drops seamlessly right below the header bar line boundary */
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--bt-border);
+    margin: 0;
+    padding: 2rem 1.5rem;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+
+    /* Hidden drawer state settings animation defaults */
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease-in-out;
+    z-index: 25;
+  }
+
+  /* 🌟 OPEN DRAWER STATE: Activates instantly upon state variable class injection */
+  .site-navContent.mobile-open {
+    max-height: 450px; /* Safely expands pixel parameter constraints to let components draw */
+    opacity: 1;
+  }
+
+  /* Stack link navigation list rows vertically cleanly */
+  .site-navLinks {
+    flex-direction: column;
+    width: 100%;
+    gap: 1.25rem;
+  }
+
+  .site-navLinks li {
+    width: 100%;
+    text-align: center;
+  }
+
+  .site-navLinks a {
+    display: block;
+    width: 100%;
+    font-size: 1.05rem;
+    padding: 0.5rem 0;
+  }
+
+  /* Expand registration action layout items full width on mobile viewports */
+  .site-navActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.85rem;
+    border-top: 1px solid var(--bt-border);
+    padding-top: 1.5rem;
+  }
+
+  .site-btnGhost,
+  .site-btnPrimary {
+    width: 100%;
+    border-radius: 12px; /* Soft look for easy finger pressing targets */
+    padding: 0.75rem 0;
+  }
+}

@@ -1,0 +1,11 @@
+export const refreshTokenNotFound = "refresh token not found or invalid";
+export const accessTokenNotFound = "access token not found or invalid";
+export const tokenExpired = "token expired";
+export const tokenInvalid = "token invalid";
+export const tokenMissing = "token missing";
+export const tokenExpired = "token expired";
+export const tokenInvalid = "token invalid";
+export const tokenMissing = "token missing";
+export const tokenExpired = "token expired";
+export const tokenInvalid = "token invalid";
+export const tokenMissing = "token missing";

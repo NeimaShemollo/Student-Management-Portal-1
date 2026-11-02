@@ -1,0 +1,93 @@
+.classroom-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Left Side: Syllabus Modules Navigation Card */
+.classroom-sidebarCard {
+  background: #ffffff;
+  border: 1px solid var(--bt-border, rgba(120, 13, 49, 0.12));
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 10px 30px rgba(26, 18, 22, 0.04);
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+
+.classroom-moduleBlock {
+  margin-bottom: 1.25rem;
+}
+
+.classroom-moduleBlock:last-child {
+  margin-bottom: 0;
+}
+
+.classroom-moduleTitle {
+  font-family: var(--font-display, "Syne", sans-serif);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bt-maroon, #780d31);
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.classroom-lessonItem {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--bt-muted, #5c5260);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.classroom-lessonItem:hover {
+  background: rgba(120, 13, 49, 0.04);
+  color: var(--bt-maroon, #780d31);
+}
+
+.classroom-lessonItem.active {
+  background: var(--bt-maroon, #780d31);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Right Side: Main Streaming Media and Lesson Viewer Panel */
+.classroom-viewerCard {
+  background: #ffffff;
+  border: 1px solid var(--bt-border, rgba(120, 13, 49, 0.12));
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 14px 40px rgba(26, 18, 22, 0.06);
+  min-height: 480px;
+}
+
+.student-courseBadge {
+  display: inline-block;
+  background: rgba(120, 13, 49, 0.08);
+  color: var(--bt-maroon, #780d31);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Responsive Breakpoints for Tablet/Mobile Frameworks */
+@media (max-width: 900px) {
+  .classroom-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .classroom-sidebarCard {
+    max-height: 280px;
+  }
+}
