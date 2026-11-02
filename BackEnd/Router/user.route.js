@@ -5,7 +5,7 @@ import {register,viewUser,updateUser,getAllStudents,getAllInstructors,registerUs
 
 import {verifyAccessToken, isAdmin, isStudent} from "../Middlewares/authMiddleware.js";
 
-import RegistrationSchema from "../Schema/RegistrationSchema.js";
+import userSchema from "../Schema/userSchema.js";
 import {getAdminOverviewStats} from "../Controller/adminController.js" 
 import { submitAssignment,getMyAssignments } from "../Controller/assignmentController.js";
 import { validate }from "../Middlewares/validate.js";
@@ -17,7 +17,7 @@ export const userRoute =
 
 userRoute.post(
     "/register",
-    validate(RegistrationSchema),
+    validate(userSchema),
     register
 );
 

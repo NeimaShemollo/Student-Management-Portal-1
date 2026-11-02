@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const RegistrationSchema = z.object({
+const userSchema = z.object({
     fullName: z
         .string({
             required_error: "Full name is required"
@@ -61,4 +61,4 @@ const RegistrationSchema = z.object({
         })
 });
 
-export default RegistrationSchema;
+export default userSchema;
