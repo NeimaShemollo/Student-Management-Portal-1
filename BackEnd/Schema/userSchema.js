@@ -15,7 +15,8 @@ const userSchema = z.object({
             required_error: "Email address is required"
         })
         .trim()
-        .email({
+        .toLowerCase() 
+        .emailAddress({
             message: "Invalid email format"
         }),
 

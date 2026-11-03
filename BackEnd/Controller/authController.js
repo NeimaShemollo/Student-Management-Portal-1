@@ -9,7 +9,8 @@ import toSafeUser from "../utils/toSafeUser.js";
 
 
 export const login = async (req, res) => {
-    const { emailAddress, password } = req.body;
+    const emailAddress = String(req.body.emailAddress || "").trim().toLowerCase();
+    const { password } = req.body;
   
     try {
       const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD;
